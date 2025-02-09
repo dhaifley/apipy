@@ -33,18 +33,15 @@ def login_access_token(
         ))],
         headers={"WWW-Authenticate": "Bearer"},
     )
-
     user = authenticate_user(user_id=form_data.username,
         password=form_data.password, session=session)
     if not user:
         raise credentials_exception
-
     exp = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     scopes: list[str] = []
     for scope in form_data.scopes:
         if scope in (user.scopes or []) or "superuser" in (user.scopes or []):
             scopes.append(scope)
-
     access_token = create_access_token(
         data={"sub": user.id, "scopes": scopes},
         expires_delta=exp,

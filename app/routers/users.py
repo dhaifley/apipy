@@ -29,15 +29,12 @@ def get_user(id: str, session: SessionDep) -> User | None:
             msg="unable to validate credentials",
         ))],
     )
-
     try:
         user = session.get(User, id)
     except Exception as e:
         raise database_exception from e
-
     if not user:
         return None
-
     return user
 
 def get_current_user(token: TokenDep,
@@ -54,12 +51,10 @@ def get_current_user(token: TokenDep,
         ))],
         headers={"WWW-Authenticate": "Bearer"},
     )
-
     if security_scopes.scopes:
         credentials_exception.headers = {
             "WWW-Authenticate": f'Bearer scope="{security_scopes.scope_str}"'
         }
-
     try:
         payload = jwt.decode(token, settings.ACCESS_TOKEN_SECRET_KEY,
             algorithms=[settings.ACCESS_TOKEN_ALGORITHM])
@@ -70,7 +65,6 @@ def get_current_user(token: TokenDep,
         token_data = TokenData(user_id=user_id, scopes=token_scopes)
     except (InvalidTokenError, ValidationError):
         raise credentials_exception
-
     user = get_user(id=token_data.user_id or "", session=session)
     if not user:
         raise credentials_exception
@@ -109,7 +103,6 @@ def get_current_active_user(
         ))],
         headers={"WWW-Authenticate": "Bearer"},
     )
-
     if current_user.status != "active":
         raise credentials_exception
     return current_user
@@ -137,24 +130,21 @@ def update_user(
             detail=[jsonable_encoder(Error(type=ErrorType.DATABASE,
                 msg="unable to get current user",
                 input={
-                    "id":current_user.id,
-                    "user":user.model_dump(warnings="none"),
+                    "id": current_user.id,
+                    "user": user.model_dump(warnings="none"),
                 },
                 ctx={"error":str(e)},
             ))]) from e
-
     if not current:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
             detail=[jsonable_encoder(Error(type=ErrorType.NOT_FOUND,
                 msg="resource not found",
                 input={
-                    "id":current_user.id,
-                    "user":user.model_dump(warnings="none"),
+                    "id": current_user.id,
+                    "user": user.model_dump(warnings="none"),
                 },
             ))])
-
     current.sqlmodel_update(user.model_dump(exclude_unset=True))
-
     try:
         current.model_validate(current)
     except ValidationError as e:
@@ -164,7 +154,6 @@ def update_user(
                 input={"id":id, "user":user.model_dump(warnings="none")},
                 ctx=json.loads(e.json()),
             ))])
-
     try:
         session.add(current)
         session.commit()
@@ -179,5 +168,4 @@ def update_user(
                 },
                 ctx={"error":str(e)},
             ))]) from e
-
     return current

@@ -60,14 +60,12 @@ def get_resource(
                 input=id,
                 ctx={"error":str(e)},
             ))]) from e
-
     if not r:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
             detail=[jsonable_encoder(Error(type=ErrorType.NOT_FOUND,
                 msg="resource not found",
                 input=id,
             ))])
-
     return r
 
 @router.post("/", tags=["resources"],
@@ -90,7 +88,6 @@ def create_resource(
                 input=resource.model_dump(warnings="none"),
                 ctx=json.loads(e.json()),
             ))])
-
     try:
         session.add(resource)
         session.commit()
@@ -99,10 +96,9 @@ def create_resource(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=[jsonable_encoder(Error(type=ErrorType.DATABASE,
                 msg="unable to create resource",
-                input=resource,
+                input=resource.model_dump(warnings="none"),
                 ctx={"error":str(e)},
             ))]) from e
-
     return resource
 
 @router.patch("/{id}", tags=["resources"],
@@ -128,7 +124,6 @@ def update_resource(
                 },
                 ctx={"error":str(e)},
             ))]) from e
-
     if not current:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
             detail=[jsonable_encoder(Error(type=ErrorType.NOT_FOUND,
@@ -138,10 +133,8 @@ def update_resource(
                     "resource":resource.model_dump(warnings="none"),
                 },
             ))])
-
     resource.id = id
     current.sqlmodel_update(resource.model_dump(exclude_unset=True))
-
     try:
         current.model_validate(current)
     except ValidationError as e:
@@ -154,7 +147,6 @@ def update_resource(
                 },
                 ctx=json.loads(e.json()),
             ))])
-
     try:
         session.add(current)
         session.commit()
@@ -169,7 +161,6 @@ def update_resource(
                 },
                 ctx={"error":str(e)},
             ))]) from e
-
     return resource
 
 @router.put("/{id}", tags=["resources"],
@@ -193,7 +184,6 @@ def replace_resource(
                 input=resource.model_dump(warnings="none"),
                 ctx=json.loads(e.json()),
             ))])
-
     try:
         session.add(resource)
         session.commit()
@@ -202,10 +192,9 @@ def replace_resource(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=[jsonable_encoder(Error(type=ErrorType.DATABASE,
                 msg="unable to replace resource",
-                input=resource,
+                input=resource.model_dump(warnings="none"),
                 ctx={"error":str(e)},
             ))]) from e
-
     return resource
 
 @router.delete("/{id}", tags=["resources"],
@@ -228,14 +217,12 @@ def delete_resource(
                input=id,
                ctx={"error":str(e)},
            ))]) from e
-
     if not r:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
             detail=[jsonable_encoder(Error(type=ErrorType.NOT_FOUND,
                 msg="resource not found",
                 input=id,
             ))])
-
     try:
         session.delete(r)
         session.commit()

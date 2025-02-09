@@ -61,13 +61,10 @@ def create_access_token(data: dict | None = None,
         to_encode = data.copy()
     else:
         to_encode = {}
-
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     else:
         expire = datetime.now(timezone.utc) + timedelta(minutes=15)
-
     to_encode.update({"exp": expire})
-
     return jwt.encode(to_encode, settings.ACCESS_TOKEN_SECRET_KEY,
         algorithm=settings.ACCESS_TOKEN_ALGORITHM)

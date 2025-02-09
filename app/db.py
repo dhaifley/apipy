@@ -18,15 +18,13 @@ def init_db():
     """
     SQLModel.metadata.create_all(engine)
 
+    # Create initial superuser.
     user_create = UserCreate(id=settings.SUPERUSER,
         password=settings.SUPERUSER_PASSWORD)
-    u = User.model_validate(
-        user_create, update={
+    u = User.model_validate(user_create, update={
             "hashed_password": get_password_hash(user_create.password),
             "scopes": ["superuser"]
-        }
-    )
-
+        })
     with Session(engine) as session:
         user = session.exec(
             select(User).where(User.id == settings.SUPERUSER)
