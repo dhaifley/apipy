@@ -12,7 +12,7 @@ from ..errors import Error, ErrorType
 from ..db import SessionDep
 from ..auth import TokenDep, TokenData, verify_password
 from ..config import settings
-from ..models import User, UserData
+from ..models import User, UserData, UserUpdate
 
 router = APIRouter(
     prefix="/user",
@@ -123,7 +123,7 @@ def UserSecurity(scopes: list[str]) -> Annotated:
 @router.patch("/", tags=["user"],
     summary="Update current user")
 def update_user(
-    user: UserData,
+    user: UserUpdate,
     current_user: Annotated[User, UserSecurity(scopes=["user:write"])],
     session: SessionDep,
 ) -> UserData:
@@ -147,7 +147,6 @@ def update_user(
                 input={"id":current_user.id, "user":user.model_dump(warnings="none")},
             ))])
 
-    user.id = current.id
     current.sqlmodel_update(user.model_dump(exclude_unset=True))
 
     try:
@@ -175,4 +174,4 @@ def update_user(
                 ctx={"error":str(e)},
             ))]) from e
 
-    return user
+    return current

@@ -4,17 +4,22 @@ Service data models.
 import uuid
 from sqlmodel import Field, SQLModel, JSON
 
-class UserData(SQLModel):
+class UserUpdate(SQLModel):
     """
-    A single user's data.
+    A single user's update data.
     """
-    id: str = Field(primary_key=True)
     name: str | None = Field(default=None, nullable=True, index=True,
         min_length=1)
     email: str | None = Field(default=None, nullable=True, index=True,
         min_length=1)
     status: str = Field(default="active")
     data: dict | None = Field(default=None, nullable=True, sa_type=JSON)
+
+class UserData(UserUpdate):
+    """
+    A single user's data.
+    """
+    id: str = Field(primary_key=True)
 
 class UserCreate(UserData):
     """
