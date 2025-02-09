@@ -16,7 +16,8 @@ router = APIRouter(
     tags=["login"],
 )
 
-@router.post("/token")
+@router.post("/token",
+    summary="Login for access token")
 def login_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     session: SessionDep,
@@ -40,7 +41,7 @@ def login_access_token(
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     scopes: list[str] = []
     for scope in form_data.scopes:
-        if scope in (user.scopes or []):
+        if scope in (user.scopes or []) or "superuser" in (user.scopes or []):
             scopes.append(scope)
 
     access_token = create_access_token(

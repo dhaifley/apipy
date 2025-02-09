@@ -1,13 +1,12 @@
 """
 Authentication types and helpers.
 """
+import jwt
+import bcrypt
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
-
-import jwt
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
-from passlib.context import CryptContext
 from pydantic import BaseModel
 from .config import settings
 
@@ -29,8 +28,6 @@ class TokenData(BaseModel):
     user_id: str | None = None
     scopes: list[str] = []
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl=settings.API_PREFIX + "/login/token",
     scopes={
@@ -49,13 +46,27 @@ def verify_password(plain_password: str | bytes,
     """
     Verify a password matches the hashed version.
     """
-    return pwd_context.verify(plain_password, hashed_password)
+    if isinstance(plain_password, str):
+        password_bytes = plain_password.encode('utf-8')
+    else:
+        password_bytes = plain_password
+
+    if isinstance(hashed_password, str):
+        hashed_bytes = hashed_password.encode('utf-8')
+    else:
+        hashed_bytes = hashed_password
+
+    return bcrypt.checkpw(password = password_bytes ,
+        hashed_password = hashed_bytes)
 
 def get_password_hash(password) -> str:
     """
     Return the hashed version of a password.
     """
-    return pwd_context.hash(password)
+    pwd_bytes = password.encode('utf-8')
+    salt = bcrypt.gensalt()
+    hashed_password = bcrypt.hashpw(password=pwd_bytes, salt=salt)
+    return str(hashed_password)
 
 def create_access_token(data: dict | None = None,
     expires_delta: timedelta | None = None):

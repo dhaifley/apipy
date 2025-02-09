@@ -4,7 +4,7 @@ An appilcation programing interface service.
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .routers import resources, login, users
-from .db import create_all
+from .db import init_db
 from .config import settings
 
 app = FastAPI(
@@ -18,7 +18,7 @@ app = FastAPI(
 
 @app.on_event("startup")
 def on_startup():
-    create_all()
+    init_db()
 
 app.add_middleware(
     CORSMiddleware,

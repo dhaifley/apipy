@@ -3,40 +3,18 @@ API routing for users.
 """
 import jwt
 from jwt.exceptions import InvalidTokenError
-from datetime import timedelta
 from typing import Annotated
 from pydantic import ValidationError
-from fastapi import APIRouter, Depends, HTTPException, Security, status
+from fastapi import APIRouter, HTTPException, Security, status
 from fastapi.encoders import jsonable_encoder
-from fastapi.security import SecurityScopes, OAuth2PasswordRequestForm
-from sqlmodel import Field, SQLModel, JSON
+from fastapi.security import SecurityScopes
 from ..errors import Error, ErrorType
 from ..db import SessionDep
 from ..auth import (
-    TokenDep, Token, TokenData,
-    verify_password, create_access_token,
-    SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
+    TokenDep, TokenData, verify_password,
+    SECRET_KEY, ALGORITHM
 )
-
-class UserData(SQLModel):
-    """
-    A single user's data.
-    """
-    id: str = Field(primary_key=True)
-    name: str | None = Field(default=None, nullable=True, index=True,
-        min_length=1)
-    email: str | None = Field(default=None, nullable=True, index=True,
-        min_length=1)
-    status: str = Field(default="active")
-    data: dict | None = Field(default=None, nullable=True, sa_type=JSON)
-
-class User(UserData, table=True):
-    """
-    A single user.
-    """
-
-    scopes: list[str] | None = Field(default=None, nullable=True, sa_type=JSON)
-    hashed_password: str | None
+from ..models import User, UserData
 
 router = APIRouter(
     prefix="/user",
@@ -97,13 +75,15 @@ def get_current_user(token: TokenDep,
     user = get_user(id=token_data.user_id or "", session=session)
     if not user:
         raise credentials_exception
-    for scope in security_scopes.scopes:
-        if scope not in token_data.scopes:
-            credentials_exception.detail = "insufficent permissions"
-            raise credentials_exception
+    if "superuser" not in (user.scopes or []):
+        for scope in security_scopes.scopes:
+            if scope not in token_data.scopes:
+                credentials_exception.detail = "insufficent permissions"
+                raise credentials_exception
     return user
 
-@router.get("/", tags=["user"])
+@router.get("/", tags=["user"],
+    summary = "Get current user")
 def get_current_active_user(
     current_user: Annotated[User,
         Security(get_current_user, scopes=["user:read"])],
