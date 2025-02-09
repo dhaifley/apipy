@@ -5,6 +5,7 @@ An apilcation programing interface service template
 
 * [Python](https://www.python.org/)
 * [pip](https://pypi.org/project/pip/)
+* [FastAPI](https://fastapi.tiangolo.com)
 
 ## Building and Testing
 
