@@ -8,10 +8,9 @@ from .config import settings
 from .auth import get_password_hash
 from .models import User, UserCreate
 
-sqlite_file_name = "api.db"
-sqlite_url = f"sqlite:///{sqlite_file_name}"
-connect_args = {"check_same_thread": False}
-engine = create_engine(sqlite_url, connect_args=connect_args)
+
+engine = create_engine(url=settings.DB_URL,
+    connect_args=settings.DB_CONNECT_ARGS)
 
 def init_db():
     """
