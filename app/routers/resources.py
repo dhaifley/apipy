@@ -75,7 +75,7 @@ def get_resource(
     summary="Create resource",
     status_code=status.HTTP_201_CREATED)
 def create_resource(
-    r: Resource,
+    resource: Resource,
     current_user: Annotated[User, UserSecurity(scopes=["resources:write"])],
     session: SessionDep,
 ) -> Resource:
@@ -83,34 +83,34 @@ def create_resource(
     Create a resource.
     """
     try:
-        r.model_validate(r)
+        resource.model_validate(resource)
     except ValidationError as e:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=[jsonable_encoder(Error(type=ErrorType.INVALID_REQUEST,
                 msg="invalid resource",
-                input=r.model_dump(warnings="none"),
+                input=resource.model_dump(warnings="none"),
                 ctx=json.loads(e.json()),
             ))])
 
     try:
-        session.add(r)
+        session.add(resource)
         session.commit()
-        session.refresh(r)
+        session.refresh(resource)
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=[jsonable_encoder(Error(type=ErrorType.DATABASE,
                 msg="unable to create resource",
-                input=r,
+                input=resource,
                 ctx={"error":str(e)},
             ))]) from e
 
-    return r
+    return resource
 
 @router.patch("/{id}", tags=["resources"],
     summary="Update resource")
 def update_resource(
     id: Annotated[uuid.UUID, Path()],
-    r: Resource,
+    resource: Resource,
     current_user: Annotated[User, UserSecurity(scopes=["resources:write"])],
     session: SessionDep,
 ) -> Resource:
@@ -123,7 +123,7 @@ def update_resource(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=[jsonable_encoder(Error(type=ErrorType.DATABASE,
                 msg="unable to get existing resource",
-                input={"id":id, "resource":r.model_dump(warnings="none")},
+                input={"id":id, "resource":resource.model_dump(warnings="none")},
                 ctx={"error":str(e)},
             ))]) from e
 
@@ -131,13 +131,11 @@ def update_resource(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
             detail=[jsonable_encoder(Error(type=ErrorType.NOT_FOUND,
                 msg="resource not found",
-                input={"id":id, "resource":r.model_dump(warnings="none")},
+                input={"id":id, "resource":resource.model_dump(warnings="none")},
             ))])
 
-    r.id = id
-    data = r.model_dump(exclude_unset=True)
-
-    current.sqlmodel_update(data)
+    resource.id = id
+    current.sqlmodel_update(resource.model_dump(exclude_unset=True))
 
     try:
         current.model_validate(current)
@@ -145,7 +143,7 @@ def update_resource(
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=[jsonable_encoder(Error(type=ErrorType.INVALID_REQUEST,
                 msg="invalid resource",
-                input={"id":id, "resource":r.model_dump(warnings="none")},
+                input={"id":id, "resource":resource.model_dump(warnings="none")},
                 ctx=json.loads(e.json()),
             ))])
 
@@ -157,17 +155,17 @@ def update_resource(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=[jsonable_encoder(Error(type=ErrorType.DATABASE,
                 msg="unable to update resource",
-                input={"id":id, "resource":r.model_dump(warnings="none")},
+                input={"id":id, "resource":resource.model_dump(warnings="none")},
                 ctx={"error":str(e)},
             ))]) from e
 
-    return r
+    return resource
 
 @router.put("/{id}", tags=["resources"],
     summary="Replace resource")
 def replace_resource(
     id: Annotated[uuid.UUID, Path()],
-    r: Resource,
+    resource: Resource,
     current_user: Annotated[User, UserSecurity(scopes=["resources:write"])],
     session: SessionDep,
 ) -> Resource:
@@ -175,36 +173,38 @@ def replace_resource(
     Replace a resource.
     """
     try:
-        r.id = id
-        r.model_validate(r)
+        resource.id = id
+        resource.model_validate(resource)
     except ValidationError as e:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=[jsonable_encoder(Error(type=ErrorType.INVALID_REQUEST,
                 msg="invalid resource",
-                input=r.model_dump(warnings="none"),
+                input=resource.model_dump(warnings="none"),
                 ctx=json.loads(e.json()),
             ))])
 
     try:
-        session.add(r)
+        session.add(resource)
         session.commit()
-        session.refresh(r)
+        session.refresh(resource)
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=[jsonable_encoder(Error(type=ErrorType.DATABASE,
                 msg="unable to replace resource",
-                input=r,
+                input=resource,
                 ctx={"error":str(e)},
             ))]) from e
 
-    return r
+    return resource
 
 @router.delete("/{id}", tags=["resources"],
     summary="Delete resource",
     status_code=status.HTTP_204_NO_CONTENT)
-def delete_resource(id: Annotated[uuid.UUID, Path()],
+def delete_resource(
+    id: Annotated[uuid.UUID, Path()],
     current_user: Annotated[User, UserSecurity(scopes=["resources:write"])],
-    session: SessionDep):
+    session: SessionDep,
+) -> None:
     """
     Delete a resource.
     """
