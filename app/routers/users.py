@@ -3,7 +3,7 @@ API routing for users.
 """
 import json, jwt
 from jwt.exceptions import InvalidTokenError
-from typing import Annotated
+from typing import Annotated, Any
 from pydantic import ValidationError
 from fastapi import APIRouter, HTTPException, Security, status
 from fastapi.encoders import jsonable_encoder
@@ -114,7 +114,7 @@ def get_current_active_user(
         raise credentials_exception
     return current_user
 
-def UserSecurity(scopes: list[str]) -> Annotated:
+def UserSecurity(scopes: list[str]) -> Any:
     """
     Security dependency for the current active user.
     """

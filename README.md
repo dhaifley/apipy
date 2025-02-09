@@ -1,4 +1,4 @@
-# apip
+# apipy
 An apilcation programing interface service template
 
 ## Requirements

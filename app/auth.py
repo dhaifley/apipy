@@ -36,32 +36,21 @@ oauth2_scheme = OAuth2PasswordBearer(
 
 TokenDep = Annotated[str, Depends(oauth2_scheme)]
 
-def verify_password(plain_password: str | bytes,
-    hashed_password: str | bytes) -> bool:
+def verify_password(plain_password: str, hashed_password: str) -> bool:
     """
     Verify a password matches the hashed version.
     """
-    if isinstance(plain_password, str):
-        password_bytes = plain_password.encode('utf-8')
-    else:
-        password_bytes = plain_password
-
-    if isinstance(hashed_password, str):
-        hashed_bytes = hashed_password.encode('utf-8')
-    else:
-        hashed_bytes = hashed_password
-
-    return bcrypt.checkpw(password = password_bytes ,
+    password_bytes = plain_password.encode()
+    hashed_bytes = bytes.fromhex(hashed_password)
+    return bcrypt.checkpw(password = password_bytes,
         hashed_password = hashed_bytes)
 
 def get_password_hash(password) -> str:
     """
     Return the hashed version of a password.
     """
-    pwd_bytes = password.encode('utf-8')
-    salt = bcrypt.gensalt()
-    hashed_password = bcrypt.hashpw(password=pwd_bytes, salt=salt)
-    return str(hashed_password)
+    return bcrypt.hashpw(password=password.encode(),
+        salt=bcrypt.gensalt()).hex()
 
 def create_access_token(data: dict | None = None,
     expires_delta: timedelta | None = None):

@@ -19,7 +19,7 @@ class UserData(UserUpdate):
     """
     A single user's data.
     """
-    id: str = Field(primary_key=True)
+    id: str = Field(primary_key=True, min_length=1)
 
 class UserCreate(UserData):
     """
@@ -32,7 +32,7 @@ class User(UserData, table=True):
     A single user.
     """
     scopes: list[str] | None = Field(default=None, nullable=True, sa_type=JSON)
-    hashed_password: str | None
+    hashed_password: str = Field(min_length=1)
 
 class Resource(SQLModel, table=True):
     """
