@@ -37,7 +37,8 @@ class Settings(BaseSettings):
         extra="ignore",
     )
     API_PREFIX: str = "/api/v1"
-    SECRET_KEY: str = secrets.token_urlsafe(32)
+    ACCESS_TOKEN_SECRET_KEY: str = secrets.token_urlsafe(32)
+    ACCESS_TOKEN_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 # 1 day
     FRONTEND_HOST: str = "http://localhost:5173"
     ENVIRONMENT: Literal["dev", "staging", "prod"] = "dev"
@@ -117,8 +118,10 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def _enforce_non_default_secrets(self) -> Self:
-        self._check_default_secret("SECRET_KEY", self.SECRET_KEY)
-        self._check_default_secret("POSTGRES_PASSWORD", self.POSTGRES_PASSWORD)
+        self._check_default_secret("ACCESS_TOKEN_SECRET_KEY",
+            self.ACCESS_TOKEN_SECRET_KEY)
+        self._check_default_secret("POSTGRES_PASSWORD",
+            self.POSTGRES_PASSWORD)
         self._check_default_secret("SUPERUSER_PASSWORD",
             self.SUPERUSER_PASSWORD)
 

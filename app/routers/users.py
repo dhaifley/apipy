@@ -10,10 +10,8 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.security import SecurityScopes
 from ..errors import Error, ErrorType
 from ..db import SessionDep
-from ..auth import (
-    TokenDep, TokenData, verify_password,
-    SECRET_KEY, ALGORITHM
-)
+from ..auth import TokenDep, TokenData, verify_password
+from ..config import settings
 from ..models import User, UserData
 
 router = APIRouter(
@@ -63,7 +61,8 @@ def get_current_user(token: TokenDep,
         }
 
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, settings.ACCESS_TOKEN_SECRET_KEY,
+            algorithms=[settings.ACCESS_TOKEN_ALGORITHM])
         user_id: str = payload.get("sub")
         if user_id is None:
             raise credentials_exception

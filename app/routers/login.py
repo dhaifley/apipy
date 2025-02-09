@@ -8,7 +8,8 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.security import OAuth2PasswordRequestForm
 from ..errors import Error, ErrorType
 from ..db import SessionDep
-from ..auth import Token, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
+from ..auth import Token, create_access_token
+from ..config import settings
 from .users import authenticate_user
 
 router = APIRouter(
@@ -38,7 +39,7 @@ def login_access_token(
     if not user:
         raise credentials_exception
 
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     scopes: list[str] = []
     for scope in form_data.scopes:
         if scope in (user.scopes or []) or "superuser" in (user.scopes or []):
