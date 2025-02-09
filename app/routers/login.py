@@ -39,7 +39,7 @@ def login_access_token(
     if not user:
         raise credentials_exception
 
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    exp = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     scopes: list[str] = []
     for scope in form_data.scopes:
         if scope in (user.scopes or []) or "superuser" in (user.scopes or []):
@@ -47,6 +47,6 @@ def login_access_token(
 
     access_token = create_access_token(
         data={"sub": user.id, "scopes": scopes},
-        expires_delta=access_token_expires,
+        expires_delta=exp,
     )
     return Token(access_token=access_token, token_type="bearer")

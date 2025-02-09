@@ -136,7 +136,10 @@ def update_user(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=[jsonable_encoder(Error(type=ErrorType.DATABASE,
                 msg="unable to get current user",
-                input={"id":current_user.id, "user":user.model_dump(warnings="none")},
+                input={
+                    "id":current_user.id,
+                    "user":user.model_dump(warnings="none"),
+                },
                 ctx={"error":str(e)},
             ))]) from e
 
@@ -144,7 +147,10 @@ def update_user(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
             detail=[jsonable_encoder(Error(type=ErrorType.NOT_FOUND,
                 msg="resource not found",
-                input={"id":current_user.id, "user":user.model_dump(warnings="none")},
+                input={
+                    "id":current_user.id,
+                    "user":user.model_dump(warnings="none"),
+                },
             ))])
 
     current.sqlmodel_update(user.model_dump(exclude_unset=True))

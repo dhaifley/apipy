@@ -122,7 +122,10 @@ def update_resource(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=[jsonable_encoder(Error(type=ErrorType.DATABASE,
                 msg="unable to get existing resource",
-                input={"id":id, "resource":resource.model_dump(warnings="none")},
+                input={
+                    "id":id,
+                    "resource":resource.model_dump(warnings="none"),
+                },
                 ctx={"error":str(e)},
             ))]) from e
 
@@ -130,7 +133,10 @@ def update_resource(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
             detail=[jsonable_encoder(Error(type=ErrorType.NOT_FOUND,
                 msg="resource not found",
-                input={"id":id, "resource":resource.model_dump(warnings="none")},
+                input={
+                    "id":id,
+                    "resource":resource.model_dump(warnings="none"),
+                },
             ))])
 
     resource.id = id
@@ -142,7 +148,10 @@ def update_resource(
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=[jsonable_encoder(Error(type=ErrorType.INVALID_REQUEST,
                 msg="invalid resource",
-                input={"id":id, "resource":resource.model_dump(warnings="none")},
+                input={
+                    "id":id,
+                    "resource":resource.model_dump(warnings="none"),
+                },
                 ctx=json.loads(e.json()),
             ))])
 
@@ -154,7 +163,10 @@ def update_resource(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=[jsonable_encoder(Error(type=ErrorType.DATABASE,
                 msg="unable to update resource",
-                input={"id":id, "resource":resource.model_dump(warnings="none")},
+                input={
+                    "id":id,
+                    "resource":resource.model_dump(warnings="none"),
+                },
                 ctx={"error":str(e)},
             ))]) from e
 
