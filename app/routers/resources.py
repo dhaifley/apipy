@@ -1,8 +1,7 @@
 """
 API routing for resources.
 """
-import json
-import uuid
+import json, uuid
 from typing import Annotated
 from pydantic import ValidationError
 from fastapi import APIRouter, Path, HTTPException, status

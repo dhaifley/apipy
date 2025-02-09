@@ -1,8 +1,7 @@
 """
 Configuration settings management.
 """
-import secrets
-import warnings
+import secrets, warnings
 from typing import Annotated, Any, Literal
 
 from pydantic import (

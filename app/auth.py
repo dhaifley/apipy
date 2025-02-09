@@ -1,8 +1,7 @@
 """
 Authentication types and helpers.
 """
-import jwt
-import bcrypt
+import jwt, bcrypt
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
 from fastapi import Depends
