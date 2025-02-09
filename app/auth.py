@@ -30,7 +30,7 @@ oauth2_scheme = OAuth2PasswordBearer(
         "user:read": "Read the current user.",
         "user:write": "Wrtie to the current user.",
         "resources:read": "Read resources.",
-        "resources:write": "Write resources.",
+        "resources:write": "Write to resources.",
         "resources:admin": "Administer resources.",
     },
 )
