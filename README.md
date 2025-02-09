@@ -18,3 +18,7 @@ Then, start the service for local testing:
 ```sh
 $ fastapi dev
 ```
+
+Access interactive documentation and local testing:
+
+* http://localhost:8000/api/v1/docs
