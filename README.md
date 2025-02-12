@@ -1,5 +1,5 @@
 # apipy
-An apilcation programing interface service template
+An application programming interface service template
 
 ## Requirements
 
