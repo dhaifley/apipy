@@ -36,7 +36,7 @@ def init_db():
 
 def get_session():
     """
-    Yeild a single database session.
+    Yield a single database session.
     """
     with Session(engine) as session:
         yield session

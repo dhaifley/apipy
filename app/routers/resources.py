@@ -143,7 +143,7 @@ def update_resource(
                 msg="invalid resource",
                 input={
                     "id":id,
-                    "resource":resource.model_dump(warnings="none"),
+                    "resource":current.model_dump(warnings="none"),
                 },
                 ctx=json.loads(e.json()),
             ))])
@@ -157,11 +157,11 @@ def update_resource(
                 msg="unable to update resource",
                 input={
                     "id":id,
-                    "resource":resource.model_dump(warnings="none"),
+                    "resource":current.model_dump(warnings="none"),
                 },
                 ctx={"error":str(e)},
             ))]) from e
-    return resource
+    return current
 
 @router.put("/{id}", tags=["resources"],
     summary="Replace resource")
@@ -175,24 +175,46 @@ def replace_resource(
     Replace a resource.
     """
     try:
-        resource.id = id
-        resource.model_validate(resource)
+        current = session.get(Resource, id)
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=[jsonable_encoder(Error(type=ErrorType.DATABASE,
+                msg="unable to get existing resource",
+                input={
+                    "id":id,
+                    "resource":resource.model_dump(warnings="none"),
+                },
+                ctx={"error":str(e)},
+            ))]) from e
+    if not current:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+            detail=[jsonable_encoder(Error(type=ErrorType.NOT_FOUND,
+                msg="resource not found",
+                input={
+                    "id":id,
+                    "resource":resource.model_dump(warnings="none"),
+                },
+            ))])
+    resource.id = id
+    current.sqlmodel_update(resource.model_dump(exclude_unset=False))
+    try:
+        current.model_validate(current)
     except ValidationError as e:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=[jsonable_encoder(Error(type=ErrorType.INVALID_REQUEST,
                 msg="invalid resource",
-                input=resource.model_dump(warnings="none"),
+                input=current.model_dump(warnings="none"),
                 ctx=json.loads(e.json()),
             ))])
     try:
-        session.add(resource)
+        session.add(current)
         session.commit()
-        session.refresh(resource)
+        session.refresh(current)
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=[jsonable_encoder(Error(type=ErrorType.DATABASE,
                 msg="unable to replace resource",
-                input=resource.model_dump(warnings="none"),
+                input=current.model_dump(warnings="none"),
                 ctx={"error":str(e)},
             ))]) from e
     return resource
